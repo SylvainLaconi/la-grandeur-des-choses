@@ -1,5 +1,5 @@
+import { TweetStatus } from '@prisma/client';
 import prisma from '../lib/prisma';
-import { TweetStatus } from '../generated/prisma';
 
 export async function createDraftTweet(content: string, scheduledAt?: Date) {
   return prisma.tweet.create({

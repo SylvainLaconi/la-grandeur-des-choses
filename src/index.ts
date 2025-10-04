@@ -3,8 +3,8 @@ import prisma from './lib/prisma';
 import { XService } from './services/x.service';
 import { updateTweetStats } from './services/tweet.service';
 import cron from 'node-cron';
-import { PrismaClient, TweetStatus } from './generated/prisma';
 import { OpenAIService } from './services/open-ai.service';
+import { PrismaClient, TweetStatus } from '@prisma/client';
 
 const app = express();
 

@@ -1,34 +1,32 @@
-import OpenAI from 'openai';
-import { config } from 'dotenv';
-import { PrismaClient } from '@prisma/client';
-import { TweetStatus } from '@prisma/client';
-
-config();
-
-export class OpenAIService {
-  private openai: OpenAI;
-
-  constructor() {
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-  }
-
-  async generateDraftTweet() {
-    const prisma = new PrismaClient();
-    // On récupère les 20 tweets les plus populaires
-
-    const popularTweets = await prisma.tweet.findMany({
-      where: { status: TweetStatus.POSTED },
-      orderBy: { popularityScore: 'desc' },
-      take: 20,
-    });
-
-    const history = popularTweets
-      .map((t) => `Tweet: "${t.content}" | Popularité: ${t.popularityScore.toFixed(2)}`)
-      .join('\n');
-
-    const prompt = `
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.OpenAIService = void 0;
+const openai_1 = __importDefault(require("openai"));
+const dotenv_1 = require("dotenv");
+const client_1 = require("@prisma/client");
+const client_2 = require("@prisma/client");
+(0, dotenv_1.config)();
+class OpenAIService {
+    constructor() {
+        this.openai = new openai_1.default({
+            apiKey: process.env.OPENAI_API_KEY,
+        });
+    }
+    async generateDraftTweet() {
+        const prisma = new client_1.PrismaClient();
+        // On récupère les 20 tweets les plus populaires
+        const popularTweets = await prisma.tweet.findMany({
+            where: { status: client_2.TweetStatus.POSTED },
+            orderBy: { popularityScore: 'desc' },
+            take: 20,
+        });
+        const history = popularTweets
+            .map((t) => `Tweet: "${t.content}" | Popularité: ${t.popularityScore.toFixed(2)}`)
+            .join('\n');
+        const prompt = `
 Tu es le compte Twitter "La Grandeur des Choses". 
 Tu écris des tweets funs, surprenants et scientifiques, avec des comparaisons de grandeurs ou des faits incroyables (ex: distances, énergie, vitesse, taille de trous noirs...).
 Il est indispensable que le tweet soit basé sur des réalités scientifiques ou sur des faits historiques.
@@ -91,25 +89,22 @@ Sers-toi de l'historique pour comprendre le style de tweet qui fonctionne mais s
 Génère un NOUVEAU tweet original dans le même style, WTF mais mature, fun, scientifique ou culturel ou basé sur des faits incroyables, avec emojis, commençant par "Et si on…". On ajoute un saut de ligne avant la conclusion. 
 On ne répète pas les tweets déjà postés.
 `;
-
-    const res = await this.openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 120,
-    });
-
-    const newTweet = res.choices[0]?.message?.content?.trim();
-
-    if (!newTweet) throw new Error('Pas de tweet généré');
-
-    console.log(newTweet);
-
-    // Sauvegarde en DB comme DRAFT
-    return await prisma.tweet.create({
-      data: {
-        content: newTweet,
-        status: TweetStatus.DRAFT,
-      },
-    });
-  }
+        const res = await this.openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: [{ role: 'user', content: prompt }],
+            max_tokens: 120,
+        });
+        const newTweet = res.choices[0]?.message?.content?.trim();
+        if (!newTweet)
+            throw new Error('Pas de tweet généré');
+        console.log(newTweet);
+        // Sauvegarde en DB comme DRAFT
+        return await prisma.tweet.create({
+            data: {
+                content: newTweet,
+                status: client_2.TweetStatus.DRAFT,
+            },
+        });
+    }
 }
+exports.OpenAIService = OpenAIService;
