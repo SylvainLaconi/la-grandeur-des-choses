@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tweet {
+  id            Int       @id @default(autoincrement())
+  twitterId     String?   @unique    
+  content       String
+  status        TweetStatus    
+  scheduledAt   DateTime?
+  postedAt      DateTime?
+  createdAt     DateTime  @default(now())
+
+  likeCount     Int       @default(0)
+  retweetCount  Int       @default(0)
+  replyCount    Int       @default(0)
+  impressionCount Int     @default(0)
+
+  popularityScore Float   @default(0.0)
+}
+
+
+enum TweetStatus {
+  DRAFT
+  SCHEDULED
+  POSTED
+  FAILED
+}
