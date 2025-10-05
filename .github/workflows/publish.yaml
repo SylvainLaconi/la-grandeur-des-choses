@@ -2,8 +2,8 @@ name: Wake up Render instance
 
 on:
   schedule:
-    # 07:58 Paris = 05:58 UTC
-    - cron: "58 5 * * *"
+    # 08:52 Paris = 06:52 UTC
+    - cron: "52 6 * * *"
 
 jobs:
   wake-up:
