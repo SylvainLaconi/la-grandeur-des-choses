@@ -36,8 +36,25 @@ app.get('/ping', (req, res) => {
   return res.json({ ok: true, time: new Date().toISOString() });
 });
 
-// === CRONS INTERNES ===
-cron.schedule('0 7 * * *', async () => {
+// ✅ Route pour mettre à jour les métriques des tweets
+app.get('/update-tweet-metrics', async (req, res) => {
+  await updateTweetMetrics();
+  return res.json({ ok: true, time: new Date().toISOString() });
+});
+
+// ✅ Route pour générer un nouveau draft de tweet
+app.get('/generate-draft-tweet', async (req, res) => {
+  await generateDraftTweet();
+  return res.json({ ok: true, time: new Date().toISOString() });
+});
+
+// ✅ Route pour publier un tweet
+app.get('/post-tweet', async (req, res) => {
+  await postTweet();
+  return res.json({ ok: true, time: new Date().toISOString() });
+});
+
+const updateTweetMetrics = async () => {
   console.info('Mise à jour des métriques…');
   const tweets = await prisma.tweet.findMany({
     where: { status: TweetStatus.POSTED },
@@ -53,9 +70,9 @@ cron.schedule('0 7 * * *', async () => {
   }
 
   console.info('✅ Metrics update terminé');
-});
+};
 
-cron.schedule('5 7 * * *', async () => {
+const generateDraftTweet = async () => {
   const prisma = new PrismaClient();
   const draftTweet = await prisma.tweet.findFirst({
     where: { status: TweetStatus.DRAFT },
@@ -66,9 +83,9 @@ cron.schedule('5 7 * * *', async () => {
   const openAIService = new OpenAIService();
   await openAIService.generateDraftTweet();
   console.info('✅ Draft généré');
-});
+};
 
-cron.schedule('10 7 * * *', async () => {
+const postTweet = async () => {
   console.info('Publication du tweet…');
   const xService = new XService();
   const draftTweet = await prisma.tweet.findFirst({
@@ -85,6 +102,19 @@ cron.schedule('10 7 * * *', async () => {
     where: { id: draftTweet.id },
     data: { status: TweetStatus.POSTED, twitterId },
   });
+};
+
+// === CRONS INTERNES ===
+cron.schedule('0 7 * * *', async () => {
+  await updateTweetMetrics();
+});
+
+cron.schedule('5 7 * * *', async () => {
+  await generateDraftTweet();
+});
+
+cron.schedule('10 7 * * *', async () => {
+  await postTweet();
 });
 
 // === Démarrage du serveur ===
