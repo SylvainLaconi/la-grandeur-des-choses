@@ -32,12 +32,13 @@ const app = express();
 
 // ✅ Route ping pour "réveiller" l'instance Render
 app.get('/ping', (req, res) => {
-  res.json({ ok: true, time: new Date().toISOString() });
+  console.info('Ping received');
+  return res.json({ ok: true, time: new Date().toISOString() });
 });
 
 // === CRONS INTERNES ===
-cron.schedule('0 8 * * *', async () => {
-  console.log('Mise à jour des métriques…');
+cron.schedule('0 7 * * *', async () => {
+  console.info('Mise à jour des métriques…');
   const tweets = await prisma.tweet.findMany({
     where: { status: TweetStatus.POSTED },
   });
@@ -51,24 +52,24 @@ cron.schedule('0 8 * * *', async () => {
     await updateTweetStats(tweet.twitterId, metrics);
   }
 
-  console.log('✅ Metrics update terminé');
+  console.info('✅ Metrics update terminé');
 });
 
-cron.schedule('5 8 * * *', async () => {
+cron.schedule('5 7 * * *', async () => {
   const prisma = new PrismaClient();
   const draftTweet = await prisma.tweet.findFirst({
     where: { status: TweetStatus.DRAFT },
   });
   if (draftTweet) return;
 
-  console.log('Génération d’un nouveau draft…');
+  console.info('Génération d’un nouveau draft…');
   const openAIService = new OpenAIService();
   await openAIService.generateDraftTweet();
-  console.log('✅ Draft généré');
+  console.info('✅ Draft généré');
 });
 
-cron.schedule('10 8 * * *', async () => {
-  console.log('Publication du tweet…');
+cron.schedule('10 7 * * *', async () => {
+  console.info('Publication du tweet…');
   const xService = new XService();
   const draftTweet = await prisma.tweet.findFirst({
     where: { status: TweetStatus.DRAFT },
@@ -79,7 +80,7 @@ cron.schedule('10 8 * * *', async () => {
   const { twitterId } = await xService.postTweet(draftTweet.content);
   if (!twitterId) return;
 
-  console.log('✅ Tweet publié');
+  console.info('✅ Tweet publié');
   await prisma.tweet.update({
     where: { id: draftTweet.id },
     data: { status: TweetStatus.POSTED, twitterId },
