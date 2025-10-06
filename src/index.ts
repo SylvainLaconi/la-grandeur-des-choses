@@ -4,7 +4,7 @@ import { XService } from './services/x.service';
 import { updateTweetStats } from './services/tweet.service';
 import cron from 'node-cron';
 import { OpenAIService } from './services/open-ai.service';
-import { PrismaClient, TweetStatus } from '@prisma/client';
+import { TweetStatus } from '@prisma/client';
 
 const app = express();
 
@@ -73,7 +73,6 @@ const updateTweetMetrics = async () => {
 };
 
 const generateDraftTweet = async () => {
-  const prisma = new PrismaClient();
   const draftTweet = await prisma.tweet.findFirst({
     where: { status: TweetStatus.DRAFT },
   });
@@ -106,15 +105,27 @@ const postTweet = async () => {
 
 // === CRONS INTERNES ===
 cron.schedule('0 7 * * *', async () => {
-  await updateTweetMetrics();
+  try {
+    await updateTweetMetrics();
+  } catch (error) {
+    console.error('Error updating tweet metrics:', error);
+  }
 });
 
 cron.schedule('5 7 * * *', async () => {
-  await generateDraftTweet();
+  try {
+    await generateDraftTweet();
+  } catch (error) {
+    console.error('Error generating draft tweet:', error);
+  }
 });
 
 cron.schedule('10 7 * * *', async () => {
-  await postTweet();
+  try {
+    await postTweet();
+  } catch (error) {
+    console.error('Error posting tweet:', error);
+  }
 });
 
 // === Démarrage du serveur ===
