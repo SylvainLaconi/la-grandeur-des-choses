@@ -31,9 +31,9 @@ const app = express();
 // populateInitialTweets();
 
 // ✅ Route ping pour "réveiller" l'instance Render
-app.get('/ping', (req, res) => {
-  console.info('Ping received');
-  return res.json({ ok: true, time: new Date().toISOString() });
+app.get('/keep-alive', (req, res) => {
+  console.info('🔄 Keep-alive');
+  res.send('OK');
 });
 
 // ✅ Route pour mettre à jour les métriques des tweets
