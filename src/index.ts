@@ -56,17 +56,29 @@ app.get('/post-tweet', async (req, res) => {
 
 const updateTweetMetrics = async () => {
   console.info('Mise à jour des métriques…');
+  const xService = new XService();
+
   const tweets = await prisma.tweet.findMany({
     where: { status: TweetStatus.POSTED },
   });
 
-  for (const tweet of tweets) {
-    const xService = new XService();
-    if (!tweet.twitterId) continue;
-    const metrics = await xService.getTweetMetrics(tweet.twitterId);
-    if (!metrics) continue;
+  if (!tweets.length) return;
 
-    await updateTweetStats(tweet.twitterId, metrics);
+  const tweetsMetrics = await xService.getTweetMetrics(
+    tweets.map((tweet) => tweet.twitterId as string),
+  );
+
+  if (!tweetsMetrics) return;
+
+  for (const tweetMetrics of tweetsMetrics) {
+    if (!tweetMetrics.id) continue;
+
+    await updateTweetStats(tweetMetrics.id, {
+      likeCount: tweetMetrics.public_metrics?.like_count ?? 0,
+      retweetCount: tweetMetrics.public_metrics?.retweet_count ?? 0,
+      replyCount: tweetMetrics.public_metrics?.reply_count ?? 0,
+      impressionCount: tweetMetrics.public_metrics?.impression_count ?? 0,
+    });
   }
 
   console.info('✅ Metrics update terminé');

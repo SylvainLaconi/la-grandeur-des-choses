@@ -64,7 +64,7 @@ De quoi alimenter Paris pendant 160 ans.
 L’énergie enfermée dans un corps humain est prodigieuse. #Physique"
 
 "Un avion de ligne vole à 900 km/h. 🚀  
-À cette vitesse, il faudrait plus de 3 000 ans pour atteindre Proxima du Centaure, notre étoile la plus proche.  
+À cette vitesse, il faudrait plus de 5 000 ans pour atteindre Proxima du Centaure, notre étoile la plus proche.  
 L’univers met nos distances en perspective. #Espace"
 
 "Chaque jour, plus de 2 milliards de tasses de café sont bues dans le monde. ☕  

@@ -28,21 +28,19 @@ export class XService {
     }
   }
 
-  async getTweetMetrics(twitterId: string) {
+  async getTweetMetrics(tweetIds: string[]) {
     try {
-      const { data } = await this.client.v2.tweets(twitterId, {
-        'tweet.fields': ['public_metrics'],
+      const { data } = await this.client.v2.tweets(tweetIds, {
+        'tweet.fields': ['id', 'public_metrics'],
       });
 
-      const metrics = data?.[0]?.public_metrics;
+      const metrics = data?.map((tweet) => {
+        return { id: tweet.id, public_metrics: tweet.public_metrics };
+      });
+
       if (!metrics) return null;
 
-      return {
-        likeCount: metrics.like_count,
-        retweetCount: metrics.retweet_count,
-        replyCount: metrics.reply_count,
-        impressionCount: metrics.impression_count,
-      };
+      return metrics;
     } catch (error) {
       console.error('Error fetching tweet metrics:', error);
       throw error;
